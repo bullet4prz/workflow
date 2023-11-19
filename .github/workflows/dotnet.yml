@@ -17,6 +17,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Get short SHA
+      id: short_sha
+      run: echo "::set-output name=sha::$(echo ${GITHUB_SHA::7})
+    
+    - name: Use short SHA
+      run: echo "Short SHA is ${{ steps.short_sha.outputs.sha }}"
+  
     - name: Checkout StayInTarkov.Client
       uses: actions/checkout@v4
       with:
@@ -43,7 +50,7 @@ jobs:
           mkdir ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
           mv ${{ github.workspace }}/${{ matrix.configuration }}-build/Assembly-CSharp.dll ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
           mv ${{ github.workspace }}/${{ matrix.configuration }}-build/StayInTarkov.dll ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
-          zip ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}.zip ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
+          zip ${{ github.workspace }}/${{ env.SolutionName }}-${{ steps.short_sha.outputs.sha }}-${{ matrix.configuration }}.zip ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
           
         done
 
@@ -53,7 +60,7 @@ jobs:
       if: github.event_name == 'pull_request'
       with:
         name: ${{ env.SolutionName }}-${{ matrix.configuration }}-${{ github.sha }}
-        path: ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
+        path: ${{ github.workspace }}/${{ env.SolutionName }}-${{ steps.short_sha.outputs.sha }}-${{ matrix.configuration }}.zip
         if-no-files-found: error
 
 
@@ -68,4 +75,4 @@ jobs:
         release_name: Release ${{ github.ref }}
         draft: true
         prerelease: false
-        files: ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}.zip 
+        files: ${{ github.workspace }}/${{ env.SolutionName }}-${{ steps.short_sha.outputs.sha }}-${{ matrix.configuration }}.zip
