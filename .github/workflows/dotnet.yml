@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+  
     - name: Checkout StayInTarkov.Client
       uses: actions/checkout@v4
       with:
@@ -42,38 +43,29 @@ jobs:
           mkdir ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
           mv ${{ github.workspace }}/${{ matrix.configuration }}-build/Assembly-CSharp.dll ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
           mv ${{ github.workspace }}/${{ matrix.configuration }}-build/StayInTarkov.dll ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
-          zip ${{ env.SolutionName }}-${{ matrix.configuration }}.zip ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
+          zip ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}.zip ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
+          
         done
 
     # Upload artifact unless its merge to master
     - name: Upload builds to artifacts
       uses: actions/upload-artifact@v3
+      if: github.event_name == 'pull_request'
       with:
         name: ${{ env.SolutionName }}-${{ matrix.configuration }}-${{ github.sha }}
-        path: ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}/
+        path: ${{ env.SolutionName }}-${{ matrix.configuration }}
         if-no-files-found: error
 
-  
-    - name: List artifacts
-      run: |
-        echo "List of artifacts:" > artifacts.txt
-        find . -name '*.zip' >> artifacts.txt
-
-    # Upload artifact unless its merge to master
-    - name: Upload artifact list
-      uses: actions/upload-artifact@v3
-      with:
-        name: artifact-list-txt
-        path: artifacts.txt
 
     - name: Create Release
       id: create_release
-      uses: actions/create-release@v1
+      uses: softprops/action-gh-release@v1
       if: github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.master_branch)
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
       with:
         tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        release_name: Pre ${{ github.ref }}
         draft: true
         prerelease: false
+        files: ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}.zip
