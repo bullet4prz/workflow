@@ -32,7 +32,6 @@ jobs:
           6.0.x
 
     - name: Determine .NET version and build
-      if: github.event_name == 'push' 
       run: |
         for dir in $(find . -name '*.csproj'); do
           cd $(dirname $dir)
@@ -69,4 +68,4 @@ jobs:
         release_name: Release ${{ github.ref }}
         draft: true
         prerelease: false
-        files: ${{ github.workspace }}/${{ env.SolutionName }}-${{ steps.short_sha.outputs.sha }}-${{ matrix.configuration }}.zip
+        files: ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}.zip
