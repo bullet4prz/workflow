@@ -6,9 +6,9 @@ on:
     - '.github/*'
     - '.github/*_TEMPLATE/**'
     - '*.md'
-    branches: [ "master" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "dev" ]
+    branches: [ "main" ]
     
 env:
   SolutionName: "StayInTarkov"
