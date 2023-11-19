@@ -18,22 +18,22 @@ jobs:
     - name: Checkout StayInTarkov.Client
       uses: actions/checkout@v4
       with:
-        submodules: recursive
         repository: 'StayInTarkov/StayInTarkov.Client'
+        branch: 'master'
         path: 'StayInTarkov.Client'
 
     - name: Checkout StayInTarkov.Manager
       uses: actions/checkout@v4
       with:
-        submodules: recursive
         repository: 'StayInTarkov/SIT.Manager'
+        branch: 'master'
         path: 'SIT.Manager'
 
     - name: Checkout SIT.Launcher.Classic
       uses: actions/checkout@v4
       with:
-        submodules: recursive
         repository: 'StayInTarkov/SIT.Launcher.Classic'
+        branch: 'master'
         path: 'SIT.Launcher.Classic'
 
     - name: Setup .NET
@@ -45,16 +45,17 @@ jobs:
           cd $(dirname $dir)
           dotnet_version=$(grep -Po '<TargetFramework>\K[^<]*' $(basename $dir))
           echo "Building $(basename $dir) with .NET version $dotnet_version"
-          dotnet build --configuration Release --no-restore
+          dotnet build --configuration ${{ matrix.configuration }} --no-restore
           cd -
         done
+
 
     - name: Archive production artifacts
       uses: actions/upload-artifact@v2
       with:
         name: archive
         path: |
-          **/bin/Release/**/*.zip
+          **/bin/Release/**/${{ matrix.configuration }}/*.zip
 
     - name: List artifacts
       run: |
@@ -67,9 +68,10 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
       with:
+        if: github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.master_branch)
         tag_name: ${{ github.ref }}
         release_name: Release ${{ github.ref }}
-        draft: false
+        draft: true
         prerelease: false
 
     - name: Upload Release Asset
@@ -77,6 +79,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
+        if: github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.master_branch)
         upload_url: ${{ steps.create_release.outputs.upload_url }} 
         asset_path: ./artifacts.txt
         asset_name: artifacts.txt
