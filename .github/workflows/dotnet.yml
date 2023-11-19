@@ -41,8 +41,8 @@ jobs:
           dotnet build /p:EnableWindowsTargeting=true --configuration ${{ matrix.configuration }} -o ${{ github.workspace }}/${{ matrix.configuration }}-build --no-restore
           mkdir ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
           mv ${{ github.workspace }}/${{ matrix.configuration }}-build/Assembly-CSharp.dll ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
-          mv ${{ github.workspace }}/${{ matrix.configuration }}-build/StayInTarkov.dll ${{ env.SolutionName }}-${{ matrix.configuration }}
-          zip ${{ env.SolutionName }}-${{ matrix.configuration }}.zip ${{ env.SolutionName }}-${{ matrix.configuration }}
+          mv ${{ github.workspace }}/${{ matrix.configuration }}-build/StayInTarkov.dll ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
+          zip ${{ env.SolutionName }}-${{ matrix.configuration }}.zip ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
         done
 
     # Upload artifact unless its merge to master
@@ -50,7 +50,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.SolutionName }}-${{ matrix.configuration }}-${{ github.sha }}
-        path: ${{ env.SolutionName }}-${{ matrix.configuration }}\
+        path: ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}/
         if-no-files-found: error
 
   
