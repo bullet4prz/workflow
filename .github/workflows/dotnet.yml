@@ -6,6 +6,8 @@ on:
   pull_request:
     branches: [ "main" ]
     
+env:
+  SolutionName: "StayInTarkovTEST"
 
 jobs:
   build:
@@ -28,30 +30,41 @@ jobs:
         dotnet-version: | 
           6.0.x
 
-    - name: Determine .NET version and build submodules
+    - name: Determine .NET version and build
       run: |
         for dir in $(find . -name '*.csproj'); do
           cd $(dirname $dir)
+          mkdir ${{ github.workspace }}/${{ matrix.configuration }}-build
           dotnet_version=$(grep -Po '<TargetFramework>\K[^<]*' $(basename $dir))
           dotnet restore
           echo "Building $(basename $dir) with .NET version $dotnet_version"
-          dotnet build /p:EnableWindowsTargeting=true --configuration ${{ matrix.configuration }} --no-restore
-          cd -
+          dotnet build /p:EnableWindowsTargeting=true --configuration ${{ matrix.configuration }} -o ${{ github.workspace }}/${{ matrix.configuration }}-build --no-restore
+          mkdir ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
+          mv ${{ github.workspace }}/${{ matrix.configuration }}-build/Assembly-CSharp.dll ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
+          mv ${{ github.workspace }}/${{ matrix.configuration }}-build/StayInTarkov.dll ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
+          zip ${{ env.SolutionName }}-${{ matrix.configuration }}.zip ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
         done
 
-
-    - name: Archive production artifacts
-      uses: actions/upload-artifact@v2
+    # Upload artifact unless its merge to master
+    - name: Upload builds to artifacts
+      uses: actions/upload-artifact@v3
       with:
-        name: ${{ matrix.configuration }}
-        path: |
-          **/bin/${{ matrix.configuration }}/**/Assembly-CSharp.dll
-          **/bin/${{ matrix.configuration }}/**/StayInTarkov.dll
+        name: ${{ env.SolutionName }}-${{ matrix.configuration }}-${{ github.sha }}
+        path: ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}/
+        if-no-files-found: error
 
+  
     - name: List artifacts
       run: |
         echo "List of artifacts:" > artifacts.txt
         find . -name '*.zip' >> artifacts.txt
+
+    # Upload artifact unless its merge to master
+    - name: Upload artifact list
+      uses: actions/upload-artifact@v3
+      with:
+        name: artifact-list-txt
+        path: artifacts.txt
 
     - name: Create Release
       id: create_release
@@ -64,14 +77,3 @@ jobs:
         release_name: Release ${{ github.ref }}
         draft: true
         prerelease: false
-
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      if: github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.master_branch)
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} 
-        asset_path: ./artifacts.txt
-        asset_name: artifacts.txt
-        asset_content_type: text/plain
