@@ -46,11 +46,11 @@ jobs:
         done
 
     # Upload artifact unless its merge to master
-    - name: Upload artifact
+    - name: Upload builds to artifacts
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.SolutionName }}-${{ matrix.configuration }}-${{ github.sha }}
-        path: ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}/
+        path: ${{ github.workspace }}\${{ env.SolutionName }}-${{ matrix.configuration }}\
         if-no-files-found: error
 
   
@@ -58,6 +58,13 @@ jobs:
       run: |
         echo "List of artifacts:" > artifacts.txt
         find . -name '*.zip' >> artifacts.txt
+
+    # Upload artifact unless its merge to master
+    - name: Upload artifact list
+      uses: actions/upload-artifact@v3
+      with:
+        name: artifact-list-txt
+        path: artifacts.txt
 
     - name: Create Release
       id: create_release
@@ -70,13 +77,3 @@ jobs:
         release_name: Release ${{ github.ref }}
         draft: true
         prerelease: false
-
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} 
-        asset_path: ./artifacts.txt
-        asset_name: artifacts.txt
-        asset_content_type: text/plain
