@@ -67,8 +67,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
       with:
-        tag_name: ${{ github.ref }}
-        name: Pre
+        tag_name: ${{ github.sha }}
+        name: Pre-${{ github.sha }}
         draft: true
         prerelease: false
         files: ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}.zip
