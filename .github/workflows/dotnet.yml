@@ -42,7 +42,8 @@ jobs:
           mkdir ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
           mv ${{ github.workspace }}/${{ matrix.configuration }}-build/Assembly-CSharp.dll ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
           mv ${{ github.workspace }}/${{ matrix.configuration }}-build/StayInTarkov.dll ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
-          zip ${{ env.SolutionName }}-${{ matrix.configuration }}.zip ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
+          zip ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}.zip ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
+          
         done
 
     # Upload artifact unless its merge to master
@@ -53,18 +54,6 @@ jobs:
         path: ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}/
         if-no-files-found: error
 
-  
-    - name: List artifacts
-      run: |
-        echo "List of artifacts:" > artifacts.txt
-        find . -name '*.zip' >> artifacts.txt
-
-    # Upload artifact unless its merge to master
-    - name: Upload artifact list
-      uses: actions/upload-artifact@v3
-      with:
-        name: artifact-list-txt
-        path: artifacts.txt
 
     - name: Create Release
       id: create_release
@@ -77,3 +66,4 @@ jobs:
         release_name: Release ${{ github.ref }}
         draft: true
         prerelease: false
+        files: ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}.zip 
