@@ -43,9 +43,10 @@ jobs:
     - name: Archive production artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: archive
+        name: ${{ matrix.configuration }}
         path: |
-          **/bin/Release/**/${{ matrix.configuration }}/*.zip
+          **/bin/${{ matrix.configuration }}/**/Assembly-CSharp.dll
+          **/bin/${{ matrix.configuration }}/**/StayInTarkov.dll
 
     - name: List artifacts
       run: |
