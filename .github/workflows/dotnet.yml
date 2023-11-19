@@ -9,6 +9,10 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+    paths-ignore:
+    - '.github/*'
+    - '.github/*_TEMPLATE/**'
+    - '*.md'
     
 env:
   SolutionName: "StayInTarkov"
@@ -20,7 +24,7 @@ jobs:
   build:
     strategy:
       matrix:
-        configuration: [Release]
+        configuration: [Release, Debug]
     runs-on: ubuntu-latest
 
     steps:
