@@ -34,14 +34,15 @@ jobs:
       run: |
         for dir in $(find . -name '*.csproj'); do
           cd $(dirname $dir)
+          mkdir ${{ matrix.configuration }}-build
           dotnet_version=$(grep -Po '<TargetFramework>\K[^<]*' $(basename $dir))
           dotnet restore
           echo "Building $(basename $dir) with .NET version $dotnet_version"
-          dotnet build /p:EnableWindowsTargeting=true --configuration ${{ matrix.configuration }} --no-restore
+          dotnet build /p:EnableWindowsTargeting=true --configuration ${{ matrix.configuration }} -o ${{ matrix.configuration }}-build --no-restore
           cd -
           mkdir ${{ env.SolutionName }}-${{ matrix.configuration }}
-          mv **/bin/${{ matrix.configuration }}/**/Assembly-CSharp.dll ${{ env.SolutionName }}-${{ matrix.configuration }}
-          mv **/bin/${{ matrix.configuration }}/**/StayInTarkov.dll ${{ env.SolutionName }}-${{ matrix.configuration }}
+          mv ${{ matrix.configuration }}-build/**/Assembly-CSharp.dll ${{ env.SolutionName }}-${{ matrix.configuration }}
+          mv ${{ matrix.configuration }}-build/**/StayInTarkov.dll ${{ env.SolutionName }}-${{ matrix.configuration }}
           zip ${{ env.SolutionName }}-${{ matrix.configuration }}.zip ${{ env.SolutionName }}-${{ matrix.configuration }}
         done
 
