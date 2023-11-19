@@ -22,19 +22,11 @@ jobs:
         branch: 'master'
         path: 'StayInTarkov.Client'
 
-    - name: Checkout SIT.Launcher.Classic
-      uses: actions/checkout@v4
-      with:
-        repository: 'StayInTarkov/SIT.Launcher.Classic'
-        branch: 'master'
-        path: 'SIT.Launcher.Classic'
-
     - name: Setup dotnet
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: | 
-          6.0.x
-          7.0.x
+          4.7.x
 
     - name: Determine .NET version and build submodules
       run: |
