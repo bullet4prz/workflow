@@ -55,10 +55,10 @@ jobs:
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
+      if: github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.master_branch)
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
       with:
-        if: github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.master_branch)
         tag_name: ${{ github.ref }}
         release_name: Release ${{ github.ref }}
         draft: true
@@ -66,10 +66,10 @@ jobs:
 
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
+      if: github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.master_branch)
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        if: github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.master_branch)
         upload_url: ${{ steps.create_release.outputs.upload_url }} 
         asset_path: ./artifacts.txt
         asset_name: artifacts.txt
