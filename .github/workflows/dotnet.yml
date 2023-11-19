@@ -20,7 +20,7 @@ jobs:
   build:
     strategy:
       matrix:
-        configuration: [Release]
+        configuration: [Release, Debug]
     runs-on: ubuntu-latest
 
     steps:
