@@ -49,9 +49,9 @@ jobs:
     - name: Archive production artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: ${{ matrix.configuration }}
+        name: ${{ env.SolutionName }}-${{ matrix.configuration }}-${{ github.sha }}
         path: |
-          ${{ env.SolutionName }}  
+          ${{ env.SolutionName }}-${{ matrix.configuration }} 
 
     - name: List artifacts
       run: |
