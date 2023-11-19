@@ -53,7 +53,7 @@ jobs:
       if: github.event_name == 'pull_request'
       with:
         name: ${{ env.SolutionName }}-${{ matrix.configuration }}-${{ github.sha }}
-        path: ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}.zip
+        path: ${{ env.SolutionName }}-${{ matrix.configuration }}
         if-no-files-found: error
 
 
