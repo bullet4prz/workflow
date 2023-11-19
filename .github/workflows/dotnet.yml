@@ -22,13 +22,6 @@ jobs:
         branch: 'master'
         path: 'StayInTarkov.Client'
 
-    - name: Checkout StayInTarkov.Manager
-      uses: actions/checkout@v4
-      with:
-        repository: 'StayInTarkov/SIT.Manager'
-        branch: 'master'
-        path: 'SIT.Manager'
-
     - name: Checkout SIT.Launcher.Classic
       uses: actions/checkout@v4
       with:
