@@ -43,7 +43,7 @@ jobs:
           dotnet_version=$(grep -Po '<TargetFramework>\K[^<]*' $(basename $dir))
           dotnet restore
           echo "Building $(basename $dir) with .NET version $dotnet_version"
-          dotnet build --configuration ${{ matrix.configuration }} --no-restore
+          dotnet build /p:EnableWindowsTargeting=true --configuration ${{ matrix.configuration }} --no-restore
           cd -
         done
 
