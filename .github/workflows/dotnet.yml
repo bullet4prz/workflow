@@ -30,7 +30,7 @@ jobs:
         dotnet-version: | 
           6.0.x
 
-    - name: Determine .NET version and build submodules
+    - name: Determine .NET version and build
       run: |
         for dir in $(find . -name '*.csproj'); do
           cd $(dirname $dir)
@@ -45,13 +45,15 @@ jobs:
           zip ${{ env.SolutionName }}-${{ matrix.configuration }}.zip ${{ env.SolutionName }}-${{ matrix.configuration }}
         done
 
-    - name: Archive production artifacts
-      uses: actions/upload-artifact@v2
+    # Upload artifact unless its merge to master
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ env.SolutionName }}-${{ matrix.configuration }}-${{ github.sha }}
-        path: |
-          ${{ env.SolutionName }}-${{ matrix.configuration }} 
+        path: ${{ env.SolutionName }}-${{ matrix.configuration }}\
+        if-no-files-found: error
 
+  
     - name: List artifacts
       run: |
         echo "List of artifacts:" > artifacts.txt
