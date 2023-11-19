@@ -2,12 +2,16 @@ name: .NET
 
 on:
   push:
+    paths-ignore:
+    - '.github/*'
+    - '.github/*_TEMPLATE/**'
+    - '*.md'
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
     
 env:
-  SolutionName: "StayInTarkovTEST"
+  SolutionName: "StayInTarkov"
 
 permissions:
   contents: write
@@ -25,7 +29,6 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: 'StayInTarkov/StayInTarkov.Client'
-        branch: 'master'
         path: 'StayInTarkov.Client'
 
     - name: Setup dotnet
@@ -59,7 +62,6 @@ jobs:
         path: ${{ env.SolutionName }}-${{ matrix.configuration }}
         if-no-files-found: error
 
-
     - name: Create Release
       id: create_release
       uses: softprops/action-gh-release@v1
@@ -70,5 +72,6 @@ jobs:
         tag_name: ${{ github.sha }}
         name: Pre-${{ github.sha }}
         draft: true
-        prerelease: false
+        prerelease: true
+        generate_release_notes: true
         files: ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}.zip
