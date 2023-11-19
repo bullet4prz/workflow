@@ -9,6 +9,9 @@ on:
 env:
   SolutionName: "StayInTarkovTEST"
 
+permissions:
+  contents: write
+  
 jobs:
   build:
     strategy:
