@@ -1,0 +1,9 @@
+[submodule "StayInTarkov.Client"]
+	path = StayInTarkov.Client
+	url = https://github.com/stayintarkov/StayInTarkov.Client.git
+[submodule "SIT.Manager"]
+	path = SIT.Manager
+	url = https://github.com/stayintarkov/SIT.Manager.git
+[submodule "SIT.Launcher"]
+	path = SIT.Launcher
+	url = https://github.com/stayintarkov/SIT.Launcher.git
