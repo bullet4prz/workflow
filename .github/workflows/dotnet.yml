@@ -59,13 +59,13 @@ jobs:
 
     - name: Create Release
       id: create_release
-      uses: actions/create-release@v1
+      uses: softprops/action-gh-release@v1
       if: github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.master_branch)
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
       with:
         tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        release_name: Pre ${{ github.ref }}
         draft: true
         prerelease: false
         files: ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}.zip
