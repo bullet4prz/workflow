@@ -29,8 +29,12 @@ jobs:
         branch: 'master'
         path: 'SIT.Launcher.Classic'
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: | 
+          6.0.x
+          7.0.x
 
     - name: Determine .NET version and build submodules
       run: |
