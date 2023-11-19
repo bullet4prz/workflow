@@ -11,7 +11,7 @@ env:
 
 permissions:
   contents: write
-  
+
 jobs:
   build:
     strategy:
@@ -46,7 +46,7 @@ jobs:
           mkdir ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
           mv ${{ github.workspace }}/${{ matrix.configuration }}-build/Assembly-CSharp.dll ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
           mv ${{ github.workspace }}/${{ matrix.configuration }}-build/StayInTarkov.dll ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
-          zip ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}.zip ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
+          zip -jr ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}.zip ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
           
         done
 
@@ -68,7 +68,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
       with:
         tag_name: ${{ github.ref }}
-        name: Pre ${{ github.ref }}
+        name: Pre
         draft: true
         prerelease: false
         files: ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}.zip
