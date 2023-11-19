@@ -41,8 +41,8 @@ jobs:
           dotnet build /p:EnableWindowsTargeting=true --configuration ${{ matrix.configuration }} -o ${{ matrix.configuration }}-build --no-restore
           cd -
           mkdir ${{ env.SolutionName }}-${{ matrix.configuration }}
-          mv ${{ matrix.configuration }}-build/**/Assembly-CSharp.dll ${{ env.SolutionName }}-${{ matrix.configuration }}
-          mv ${{ matrix.configuration }}-build/**/StayInTarkov.dll ${{ env.SolutionName }}-${{ matrix.configuration }}
+          mv ${{ matrix.configuration }}-build/Assembly-CSharp.dll ${{ env.SolutionName }}-${{ matrix.configuration }}
+          mv ${{ matrix.configuration }}-build/StayInTarkov.dll ${{ env.SolutionName }}-${{ matrix.configuration }}
           zip ${{ env.SolutionName }}-${{ matrix.configuration }}.zip ${{ env.SolutionName }}-${{ matrix.configuration }}
         done
 
