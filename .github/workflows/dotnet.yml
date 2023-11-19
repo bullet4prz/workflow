@@ -34,17 +34,16 @@ jobs:
       run: |
         for dir in $(find . -name '*.csproj'); do
           cd $(dirname $dir)
-          mkdir ${{ matrix.configuration }}-build
+          mkdir ${{ github.workspace }}/${{ matrix.configuration }}-build
           dotnet_version=$(grep -Po '<TargetFramework>\K[^<]*' $(basename $dir))
           dotnet restore
           echo "Building $(basename $dir) with .NET version $dotnet_version"
-          dotnet build /p:EnableWindowsTargeting=true --configuration ${{ matrix.configuration }} -o ${{ matrix.configuration }}-build --no-restore
-          mkdir ${{ env.SolutionName }}-${{ matrix.configuration }}
-          mv ${{ matrix.configuration }}-build/Assembly-CSharp.dll ${{ env.SolutionName }}-${{ matrix.configuration }}
-          mv ${{ matrix.configuration }}-build/StayInTarkov.dll ${{ env.SolutionName }}-${{ matrix.configuration }}
+          dotnet build /p:EnableWindowsTargeting=true --configuration ${{ matrix.configuration }} -o ${{ github.workspace }}/${{ matrix.configuration }}-build --no-restore
+          mkdir ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
+          mv ${{ github.workspace }}/${{ matrix.configuration }}-build/Assembly-CSharp.dll ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
+          mv ${{ github.workspace }}/${{ matrix.configuration }}-build/StayInTarkov.dll ${{ env.SolutionName }}-${{ matrix.configuration }}
           zip ${{ env.SolutionName }}-${{ matrix.configuration }}.zip ${{ env.SolutionName }}-${{ matrix.configuration }}
         done
-
 
     - name: Archive production artifacts
       uses: actions/upload-artifact@v2
