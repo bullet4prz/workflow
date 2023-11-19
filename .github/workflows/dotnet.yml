@@ -42,7 +42,7 @@ jobs:
           mkdir ${{ env.SolutionName }}-${{ matrix.configuration }}
           mv **/bin/${{ matrix.configuration }}/**/Assembly-CSharp.dll ${{ env.SolutionName }}-${{ matrix.configuration }}
           mv **/bin/${{ matrix.configuration }}/**/StayInTarkov.dll ${{ env.SolutionName }}-${{ matrix.configuration }}
-          zip ${{ env.SolutionName }}-${{ matrix.configuration }}.zip ${{ env.SolutionName }}
+          zip ${{ env.SolutionName }}-${{ matrix.configuration }}.zip ${{ env.SolutionName }}-${{ matrix.configuration }}
         done
 
 
