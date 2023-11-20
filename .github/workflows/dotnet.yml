@@ -2,18 +2,19 @@ name: .NET
 
 on:
   push:
+    branches:
+      - main
     paths-ignore:
-    - '.github/*'
-    - '.github/*_TEMPLATE/**'
-    - '*.md'
-    branches: [ "main" ]
+      - '.github/**'
+      - '*.md'
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
     paths-ignore:
-    - '.github/*'
-    - '.github/*_TEMPLATE/**'
-    - '*.md'
-    
+      - '.github/**'
+      - '*.md'
+
+
 env:
   SolutionName: "StayInTarkov"
 
@@ -44,7 +45,7 @@ jobs:
 
     - name: Determine .NET version and build
       run: |
-        echo "RSHA=${{ github.sha }}:0:7" >> $GITHUB_ENV
+        echo "RSHA=${{ github.sha:0:7 }}" >> $GITHUB_ENV
         mkdir ${{ github.workspace}}/rls
         for dir in $(find . -name '*.csproj'); do
           cd $(dirname $dir)
