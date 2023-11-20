@@ -65,7 +65,7 @@ jobs:
       uses: actions/upload-artifact@v3
       if: github.event_name == 'pull_request'
       with:
-        name: ${{ env.SolutionName }}-${{ matrix.configuration }}-${{ github.sha }}
+        name: ${{ env.SolutionName }}-${{ matrix.configuration }}-${{ env.RSHA }}
         path: ${{ env.SolutionName }}-${{ matrix.configuration }}
         if-no-files-found: error
 
