@@ -12,6 +12,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        configuration: [Release, Debug]
+
     steps:
 
       - name: Set Client
@@ -49,22 +53,31 @@ jobs:
         if: ${{ env.BUILD_DOTNET != '' }} 
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: | 
-            ${{ env.BUILD_DOTNET }}
+          dotnet-version: ${{ env.BUILD_DOTNET }}
 
       - name: Checkout Repository
+        if: ${{ env.BUILD_DOTNET != '' }}
         uses: actions/checkout@v2
         with:
           repository: ${{ env.SETREPO }}
+
+      - name: Setup MSBuild.exe
+        uses: microsoft/setup-msbuild@v1.0.2
 
       - name: Build and Test - dotnet
         if: ${{ env.BUILD_DOTNET != '' }} 
         run: |
           echo ${{ github.repository }}
-          pwd
+          pwd && ls -t
+          mkdir ${{ github.workspace }}/${{ matrix.configuration }}-build
           dotnet restore
-          dotnet build
+          dotnet build --configuration ${{ matrix.configuration }} -o ${{ github.workspace }}/${{ matrix.configuration }}-build
           dotnet test
+
+      - name: Build package of ${{ env.BUILD }}
+        run: |
+          ls -t ${{ github.workspace }}/${{ matrix.configuration }}-build
+          ls -t ${{ github.workspace }}/${{ matrix.configuration }}-build/*
 
       - name: Build and Test - server
         if: ${{ env.BUILD == 'server' }} 
