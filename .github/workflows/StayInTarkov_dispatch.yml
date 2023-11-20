@@ -67,9 +67,6 @@ jobs:
         with:
           repository: ${{ env.SETREPO }}
 
-      - name: Setup MSBuild.exe
-        uses: microsoft/setup-msbuild@v1.0.2
-
       - name: Build and Test - dotnet
         if: ${{ env.BUILD_DOTNET != '' }} 
         run: |
@@ -77,7 +74,7 @@ jobs:
           pwd && ls -t
           mkdir ${{ github.workspace }}/${{ matrix.configuration }}-build
           dotnet restore
-          dotnet build --configuration ${{ matrix.configuration }} -o ${{ github.workspace }}/${{ matrix.configuration }}-build
+          dotnet build --nologo --no-restore  -c ${{ matrix.configuration }} -o ${{ github.workspace }}/${{ matrix.configuration }}-build /p:Platform=AnyCPU /p:PlatformTarget=x64
           dotnet test
 
       - name: Build package of ${{ env.BUILD }} - dotnet
