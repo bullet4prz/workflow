@@ -147,4 +147,4 @@ jobs:
           generate_release_notes: true
           tag_name: ${{ env.SOLUTION }}-${{ env.NOW }}-v1.${{ github.run_number }}
           files: |
-            ${{ github.workspace }}/out/${{ env. SOLUTION }}-${{ matrix.configuration }}.zip
+            out/${{ env. SOLUTION }}-${{ matrix.configuration }}.zip
