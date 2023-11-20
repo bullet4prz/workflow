@@ -1,0 +1,205 @@
+
+name: Stay In Tarkov Build Dispatcher AIO
+
+on:
+  workflow_dispatch:
+    inputs:
+      build:
+        description: 'client launcher manager server'
+        required: true
+
+permissions:
+  contents: write
+jobs:
+  client:
+    runs-on: ubuntu-latest
+
+    if: ${{ github.event.inputs.build == 'client' }}
+
+    strategy:
+      matrix:
+        configuration: [Release, Debug]
+
+    steps:
+      - name: Set Client
+        if: ${{ github.event.inputs.build == 'client' }}
+        run: |
+          echo "BUILD=client" >> $GITHUB_ENV
+          echo "BUILD_DOTNET=6.0.x" >> $GITHUB_ENV
+          echo "SETREPO=stayintarkov/StayInTarkov.Client" >> $GITHUB_ENV
+          echo "SOLUTION=StayInTarkov-Client" >> $GITHUB_ENV
+
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ env.BUILD_DOTNET }}
+
+      - name: ${{ github.event.inputs.build }}
+        run: |
+          echo $SETREPO $BUILD_DOTNET
+          echo ${{ github.event.inputs.build }}
+          SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-6)
+          echo "SHORT_SHA=${SHORT_SHA}" >> $GITHUB_ENV
+          NOW=$(date +"%Y-%m-%d")
+          echo "NOW=$NOW" >> $GITHUB_ENV
+          cat $GITHUB_ENV > env-vars
+          cat $GITHUB_ENV
+          echo $GITHUB_ENV
+          mkdir out
+
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          repository: ${{ env.SETREPO }}
+          path: __build
+
+
+      - name: Clear NuGet package cache
+        run: |
+          cd __build
+          dotnet nuget locals all --clear
+          cd -
+
+      - name: Build and Test - client - dotnet
+        run: |
+          cd __build
+          dotnet --version
+          dotnet restore 
+          dotnet build Source/StayInTarkov.csproj --nologo --no-restore --self-contained true /p:PublishSingleFile=true -c ${{ matrix.configuration }} -o ${{ github.workspace }}/out/${{ env.SOLUTION }}-${{ matrix.configuration }} /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true
+          dotnet test
+          git rev-parse HEAD
+        shell: /usr/bin/bash -e {0}
+
+      - name: Prebuild artifact(s) for ${{ env.BUILD }} - dotnet
+        run: |
+          ls -t ${{ github.workspace }}/out/${{ env.SOLUTION }}-${{ matrix.configuration }}/* | grep -i -e Json -e pdb | xargs -n1 rm
+          zip -jr ${{ github.workspace }}/out/${{ env.SOLUTION }}-${{ matrix.configuration }}.zip ${{ matrix.configuration }} -o ${{ github.workspace }}/out/${{ env.SOLUTION }}-${{ matrix.configuration }}
+
+      - name: Upload Client build to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.SOLUTION }}-${{ matrix.configuration }}-${{ env.SHORT_SHA }}
+          path: ${{ github.workspace }}/out/${{ env.SOLUTION }}-${{ matrix.configuration }}.zip
+          if-no-files-found: warn
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          generate_release_notes: true
+          tag_name: ${{ env.SOLUTION }}-${{ env.NOW }}-v1.${{ github.run_number }}
+          files: |
+            out/${{ env.SOLUTION }}-${{ matrix.configuration }}.zip
+
+  launchers:
+    runs-on: windows-latest
+    
+    if: ${{ github.event.inputs.build == 'manager' || github.event.inputs.build == 'launcher' }}
+
+    strategy:
+      matrix:
+        configuration: [Release]
+    
+    steps:
+      - name: Set build date
+        run: |
+          $NOW=& Get-Date -format yyyy-MM-dd
+          echo "NOW=$NOW" >> $env:GITHUB_ENV
+      - name: Set Launcher
+        if: ${{ github.event.inputs.build == 'launcher' }}
+        run: |
+          echo "BUILD=launcher" >> $env:GITHUB_ENV
+          echo "BUILD_DOTNET=8.0.x" >> $env:GITHUB_ENV
+          echo "SETREPO=stayintarkov/SIT.Launcher.Classic" >> $env:GITHUB_ENV
+          echo "SOLUTION=SIT.Launcher" >> $env:GITHUB_ENV
+
+      - name: Set Manager
+        if: ${{ github.event.inputs.build == 'manager' }}
+        run: |
+          echo "BUILD=manager" >> $env:GITHUB_ENV
+          echo "BUILD_DOTNET=8.0.x" >> $env:GITHUB_ENV
+          echo "SETREPO=stayintarkov/SIT.Manager" >> $env:GITHUB_ENV
+          echo "SOLUTION=SIT.Manager" >> $env:GITHUB_ENV
+
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ env.BUILD_DOTNET }}
+
+      - name: Setup MSBuild.exe
+        uses: microsoft/setup-msbuild@v1.0.2
+
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          repository: ${{ env.SETREPO }}
+          path: __build
+
+      - name: Clear NuGet package cache + Prep
+        run: |
+          cd __build
+          dotnet nuget locals all --clear
+          cd -
+          mkdir out
+
+      - name: Build and Test - manager - dotnet
+        if: ${{ github.event.inputs.build == 'manager'}} 
+        run: |
+          cd __build
+          dotnet --version
+          dotnet restore /p:EnableWindowsTargeting=true
+          dotnet publish ${{ env.SOLUTION }}/${{ env.SOLUTION }}.csproj /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true /p:PublishSingleFile=true --self-contained true --nologo -c ${{ matrix.configuration }} -o ${{ github.workspace }}/out/${{ env.SOLUTION }}-${{ matrix.configuration }} /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true /p:PublishSingleFile=true
+          dotnet test
+          git rev-parse HEAD
+          cd -
+    
+      - name: Build and Test - launcher - dotnet
+        if: ${{ github.event.inputs.build == 'launcher'}}
+        run: |
+          cd __build
+          dotnet --version
+          dotnet restore /p:EnableWindowsTargeting=true
+          dotnet publish ${{ env.SOLUTION }}/${{ env.SOLUTION }}.csproj /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true /p:PublishSingleFile=true --self-contained true -c ${{ matrix.configuration }} -o %GITHUB_WORKSPACE%/out/${{ env.SOLUTION }}-${{ matrix.configuration }} 
+          dotnet test
+          git rev-parse HEAD
+          cd -
+
+      - name: Prebuild artifact(s) for ${{ env.BUILD }} - dotnet
+        run: |
+          cd out
+          Compress-Archive -Path ${{ env.SOLUTION }}-${{ matrix.configuration }} -DestinationPath ${{ env.SOLUTION }}-${{ matrix.configuration }}.zip
+
+      - name: Upload Launcher/Manager build to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.SOLUTION }}-${{ matrix.configuration }}-${{ github.run_number }}
+          path: ${{ github.workspace }}/out/${{ env.SOLUTION }}-${{ matrix.configuration }}.zip
+          if-no-files-found: warn
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          generate_release_notes: true
+          tag_name: ${{ env.SOLUTION }}-${{ env.NOW }}-v1.${{ github.run_number }}
+          files: |
+            out/${{ env.SOLUTION }}-${{ matrix.configuration }}.zip
+
+  server:
+    runs-on: ubuntu-latest
+
+    if: ${{ github.event.inputs.build == 'server'}}
+
+    steps:
+      - name: Set Server
+        run: |
+          echo "BUILD=server" >> $GITHUB_ENV
+          echo "SETREPO=stayintarkov/SIT.Aki-Server-Mod" >> $GITHUB_ENV
+          echo "SOLUTION=SPT-AKI-x-PREBUILT-with-SIT" >> $GITHUB_ENV
+          
+      - name: Build and Test - server
+        run: |
+          echo ${{ github.repository }}
+          echo ${{ env.SETREPO }}
+          git rev-parse HEAD
+          echo ${{ env.SOLUTION }}
