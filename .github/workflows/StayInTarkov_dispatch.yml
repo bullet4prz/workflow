@@ -82,7 +82,7 @@ jobs:
           echo ${LAST_COMMIT}
 
       - name: Build and Test - manager - dotnet
-        if: ${{ env.BUILD_DOTNET != '' &&  env.BUILD != 'manager'}} 
+        if: ${{ env.BUILD_DOTNET != '' &&  env.BUILD == 'manager'}} 
         run: |
           cd ${{ env. SOLUTION }}_build
           dotnet restore
