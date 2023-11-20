@@ -18,21 +18,21 @@ jobs:
         if: ${{ github.event.inputs.build == 'client' }}
         run: |
           echo "BUILD=client" >> $GITHUB_ENV
-          echo "BUILD_DOTNET=6.0.x" >> $GITHUB_ENV
+          echo "BUILD_DOTNET=" >> $GITHUB_ENV
           echo "SETREPO=stayintarkov/StayInTarkov.Client" >> $GITHUB_ENV
 
       - name: Set Launcher
         if: ${{ github.event.inputs.build == 'launcher' }}
         run: |
           echo "BUILD=launcher" >> $GITHUB_ENV
-          echo "BUILD_DOTNET=8.0.x" >> $GITHUB_ENV
+          echo "BUILD_DOTNET=" >> $GITHUB_ENV
           echo "SETREPO=stayintarkov/SIT.Launcher.Classic" >> $GITHUB_ENV
 
-      - name: Set Manager
+      - name: Set Client
         if: ${{ github.event.inputs.build == 'manager' }}
         run: |
           echo "BUILD=manager" >> $GITHUB_ENV
-          echo "BUILD_DOTNET=6.0.x" >> $GITHUB_ENV
+          echo "BUILD_DOTNET=" >> $GITHUB_ENV
           echo "SETREPO=stayintarkov/SIT.Manager" >> $GITHUB_ENV
 
       - name: Set Server
@@ -43,7 +43,8 @@ jobs:
 
 
       - name: ${{ github.sha }} ${{ env.BUILD }}
-        run: echo "${{ env.SETREPO }} + ${{ env.BUILD_DOTNET }}"
+        run: echo "echo $SETREPO $BUILD_DOTNET"
+
 
       - name: Setup dotnet
         if: ${{ env.BUILD_DOTNET != '' }} 
@@ -57,7 +58,7 @@ jobs:
         with:
           repository: ${{ env.SETREPO }}
 
-      - name: Build and Test - dotnet
+      - name: Build and Test
         if: ${{ env.BUILD_DOTNET != '' }} 
         run: |
           echo ${{ github.repository }}
@@ -65,9 +66,3 @@ jobs:
           dotnet restore
           dotnet build
           dotnet test
-
-      - name: Build and Test - server
-        if: ${{ env.BUILD == 'server' }} 
-        run: |
-          echo ${{ github.repository }}
-          echo ${{ env.SETREPO }}
