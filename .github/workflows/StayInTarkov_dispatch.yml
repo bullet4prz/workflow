@@ -73,10 +73,18 @@ jobs:
           echo "NOW=$NOW" >> $GITHUB_ENV
           mkdir out
 
+      - name: Clear NuGet package cache
+        if: ${{ env.BUILD_DOTNET != ''}}
+        run: |
+          cd ${{ env. SOLUTION }}_build
+          dotnet nuget locals all --clear
+          cd -
+
       - name: Build and Test - client - dotnet
         if: ${{ env.BUILD_DOTNET != '' &&  env.BUILD == 'client'}} 
         run: |
           cd ${{ env. SOLUTION }}_build
+          dotnet --version
           dotnet restore
           dotnet build Source/StayInTarkov.csproj --nologo --no-restore --self-contained true /p:PublishSingleFile=true -c ${{ matrix.configuration }} -o ${{ github.workspace }}/out/${{ env. SOLUTION }}-${{ matrix.configuration }} /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true
           dotnet test
@@ -87,6 +95,7 @@ jobs:
         if: ${{ env.BUILD_DOTNET != '' &&  env.BUILD == 'manager'}} 
         run: |
           cd ${{ env. SOLUTION }}_build
+          dotnet --version
           dotnet restore
           dotnet publish ${{ env. SOLUTION }}/${{env.SOLUTION}}.csproj --self-contained true -r win-x64 --nologo -c ${{ matrix.configuration }} -o ${{ github.workspace }}/out/${{ env. SOLUTION }}-${{ matrix.configuration }} /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true /p:PublishSingleFile=true
           dotnet test
@@ -98,6 +107,7 @@ jobs:
         if: ${{ env.BUILD_DOTNET != '' &&  env.BUILD == 'launcher'}} 
         run: |
           cd ${{ env. SOLUTION }}_build
+          dotnet --version
           dotnet restore
           dotnet publish ${{env.SOLUTION}}/${{env.SOLUTION}}.csproj -r win-x64 --self-contained true --nologo -c ${{ matrix.configuration }} -o ${{ github.workspace }}/out/${{ env. SOLUTION }}-${{ matrix.configuration }} /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true /p:PublishSingleFile=true
           dotnet test
