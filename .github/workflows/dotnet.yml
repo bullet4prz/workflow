@@ -2,25 +2,23 @@ name: .NET
 
 on:
   push:
-    branches:
-      - main
     paths-ignore:
-      - '.github/**'
-      - '*.md'
+    - '.github/*'
+    - '.github/*_TEMPLATE/**'
+    - '*.md'
+    branches: [ "main" ]
   pull_request:
-    branches:
-      - main
+    branches: [ "main" ]
     paths-ignore:
-      - '.github/**'
-      - '*.md'
-
-
+    - '.github/*'
+    - '.github/*_TEMPLATE/**'
+    - '*.md'
+    
 env:
   SolutionName: "StayInTarkov"
 
 permissions:
   contents: write
-  pull-requests: write
 
 jobs:
   build:
@@ -45,8 +43,6 @@ jobs:
 
     - name: Determine .NET version and build
       run: |
-        echo "RSHA=${{ github.sha:0:7 }}" >> $GITHUB_ENV
-        mkdir ${{ github.workspace}}/rls
         for dir in $(find . -name '*.csproj'); do
           cd $(dirname $dir)
           mkdir ${{ github.workspace }}/${{ matrix.configuration }}-build
@@ -57,16 +53,16 @@ jobs:
           mkdir ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
           mv ${{ github.workspace }}/${{ matrix.configuration }}-build/Assembly-CSharp.dll ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
           mv ${{ github.workspace }}/${{ matrix.configuration }}-build/StayInTarkov.dll ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
-          zip -jr ${{ github.workspace }}/rls/${{ env.SolutionName }}-${{ matrix.configuration }}.zip ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
+          zip -jr ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}.zip ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}
           
         done
 
     # Upload artifact unless its merge to master
-    - name: Upload ${{ env.RSHA }} build to artifacts
+    - name: Upload builds to artifacts
       uses: actions/upload-artifact@v3
       if: github.event_name == 'pull_request'
       with:
-        name: ${{ env.SolutionName }}-${{ matrix.configuration }}-${{ env.RSHA }}
+        name: ${{ env.SolutionName }}-${{ matrix.configuration }}-${{ github.sha }}
         path: ${{ env.SolutionName }}-${{ matrix.configuration }}
         if-no-files-found: error
 
@@ -77,10 +73,9 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
       with:
-        tag_name: ${{ env.RSHA }}
-        name: Pre-${{ env.RSHA }}
+        tag_name: ${{ github.sha }}
+        name: Pre-${{ github.sha }}
         draft: true
         prerelease: true
         generate_release_notes: true
-        files: |
-          ${{ github.workspace }}/rls/${{ env.SolutionName }}-${{ matrix.configuration }}.zip
+        files: ${{ github.workspace }}/${{ env.SolutionName }}-${{ matrix.configuration }}.zip
