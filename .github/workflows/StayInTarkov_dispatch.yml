@@ -74,7 +74,7 @@ jobs:
         run: |
           mkdir ${{ github.workspace }}/${{ matrix.configuration }}-build
           dotnet restore
-          dotnet build --nologo --no-restore -c ${{ matrix.configuration }} -o ${{ github.workspace }}/${{ matrix.configuration }}-build /p:PlatformTarget=x64 /p:NoWarn=CS0649
+          dotnet build --nologo --no-restore -c ${{ matrix.configuration }} -o ${{ github.workspace }}/${{ matrix.configuration }}-build /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true
           dotnet test
           echo ${{ env.LAST_COMMIT}}
 
