@@ -38,7 +38,7 @@ jobs:
         if: ${{ github.event.inputs.build == 'manager' }}
         run: |
           echo "BUILD=manager" >> $GITHUB_ENV
-          echo "BUILD_DOTNET=6.0.x" >> $GITHUB_ENV
+          echo "BUILD_DOTNET=7.0.x" >> $GITHUB_ENV
           echo "SETREPO=stayintarkov/SIT.Manager" >> $GITHUB_ENV
           echo "SOLUTION=SIT.Manager" >> $GITHUB_ENV
 
@@ -74,7 +74,7 @@ jobs:
         run: |
           mkdir ${{ github.workspace }}/${{ matrix.configuration }}-build
           dotnet restore
-          dotnet build --nologo --no-restore -c ${{ matrix.configuration }} -o ${{ github.workspace }}/${{ matrix.configuration }}-build /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true
+          dotnet build --nologo --no-restore --self-contained true -r win-x64 /p:PublishSingleFile=true -c ${{ matrix.configuration }} -o ${{ github.workspace }}/${{ matrix.configuration }}-build /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true
           dotnet test
           echo ${{ env.LAST_COMMIT}}
 
