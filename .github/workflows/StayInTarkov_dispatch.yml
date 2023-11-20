@@ -49,12 +49,6 @@ jobs:
           echo "SETREPO=stayintarkov/SIT.Aki-Server-Mod" >> $GITHUB_ENV
           echo "SOLUTION=SPT-AKI-x-PREBUILT-with-SIT" >> $GITHUB_ENV
 
-      - name: ${{ env.SHORT_SHA }} ${{ env.BUILD }}
-        run: |
-          echo "echo $SETREPO $BUILD_DOTNET"
-          SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-6)
-          echo "SHORT_SHA=${SHORT_SHA}" >> $GITHUB_ENV
-
       - name: Setup dotnet
         if: ${{ env.BUILD_DOTNET != '' }} 
         uses: actions/setup-dotnet@v3
@@ -67,14 +61,22 @@ jobs:
         with:
           repository: ${{ env.SETREPO }}
 
+      - name: ${{ env.SHORT_SHA }} ${{ env.BUILD }}
+        run: |
+          echo "echo $SETREPO $BUILD_DOTNET"
+          SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-6)
+          echo "SHORT_SHA=${SHORT_SHA}" >> $GITHUB_ENV
+          LAST_COMMIT=$(git rev-parse HEAD)
+          echo "LAST_COMMIT=${LAST_COMMIT}" >> $GITHUB_ENV
+
       - name: Build and Test - dotnet
         if: ${{ env.BUILD_DOTNET != '' }} 
         run: |
-          pwd && ls -t
           mkdir ${{ github.workspace }}/${{ matrix.configuration }}-build
           dotnet restore
           dotnet build --nologo --no-restore -c ${{ matrix.configuration }} -o ${{ github.workspace }}/${{ matrix.configuration }}-build /p:PlatformTarget=x64 /p:NoWarn=CS0649
           dotnet test
+          echo ${{ env.LAST_COMMIT}}
 
       - name: Build package of ${{ env.BUILD }} - dotnet
         if: ${{ env.BUILD_DOTNET != '' }}
@@ -94,3 +96,4 @@ jobs:
         run: |
           echo ${{ github.repository }}
           echo ${{ env.SETREPO }}
+
