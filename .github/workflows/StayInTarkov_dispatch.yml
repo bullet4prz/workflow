@@ -12,57 +12,91 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        configuration: [Release, Debug]
+
     steps:
 
       - name: Set Client
         if: ${{ github.event.inputs.build == 'client' }}
         run: |
           echo "BUILD=client" >> $GITHUB_ENV
-          echo "BUILD_DOTNET=" >> $GITHUB_ENV
+          echo "BUILD_DOTNET=6.0.x" >> $GITHUB_ENV
           echo "SETREPO=stayintarkov/StayInTarkov.Client" >> $GITHUB_ENV
+          echo "SOLUTION=StayInTarkov-Client" >> $GITHUB_ENV
 
       - name: Set Launcher
         if: ${{ github.event.inputs.build == 'launcher' }}
         run: |
           echo "BUILD=launcher" >> $GITHUB_ENV
-          echo "BUILD_DOTNET=" >> $GITHUB_ENV
+          echo "BUILD_DOTNET=8.0.x" >> $GITHUB_ENV
           echo "SETREPO=stayintarkov/SIT.Launcher.Classic" >> $GITHUB_ENV
+          echo "SOLUTION=SIT.Launcher.Classic" >> $GITHUB_ENV
 
-      - name: Set Client
+      - name: Set Manager
         if: ${{ github.event.inputs.build == 'manager' }}
         run: |
           echo "BUILD=manager" >> $GITHUB_ENV
-          echo "BUILD_DOTNET=" >> $GITHUB_ENV
+          echo "BUILD_DOTNET=6.0.x" >> $GITHUB_ENV
           echo "SETREPO=stayintarkov/SIT.Manager" >> $GITHUB_ENV
+          echo "SOLUTION=SIT.Manager" >> $GITHUB_ENV
 
       - name: Set Server
         if: ${{ github.event.inputs.build == 'server' }}
         run: |
           echo "BUILD=server" >> $GITHUB_ENV
           echo "SETREPO=stayintarkov/SIT.Aki-Server-Mod" >> $GITHUB_ENV
+          echo "SOLUTION=SPT-AKI-x-PREBUILT-with-SIT" >> $GITHUB_ENV
 
-
-      - name: ${{ github.sha }} ${{ env.BUILD }}
-        run: echo "echo $SETREPO $BUILD_DOTNET"
-
+      - name: ${{ env.SHORT_SHA }} ${{ env.BUILD }}
+        run: |
+          echo "echo $SETREPO $BUILD_DOTNET"
+          SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-6)
+          echo "SHORT_SHA=${SHORT_SHA}" >> $GITHUB_ENV
 
       - name: Setup dotnet
         if: ${{ env.BUILD_DOTNET != '' }} 
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: | 
-            ${{ env.BUILD_DOTNET }}
+          dotnet-version: ${{ env.BUILD_DOTNET }}
 
       - name: Checkout Repository
+        if: ${{ env.BUILD_DOTNET != '' }}
         uses: actions/checkout@v2
         with:
           repository: ${{ env.SETREPO }}
 
-      - name: Build and Test
+      - name: Setup MSBuild.exe
+        uses: microsoft/setup-msbuild@v1.0.2
+
+      - name: Build and Test - dotnet
         if: ${{ env.BUILD_DOTNET != '' }} 
         run: |
           echo ${{ github.repository }}
-          pwd
+          pwd && ls -t
+          mkdir ${{ github.workspace }}/${{ matrix.configuration }}-build
           dotnet restore
-          dotnet build
+          dotnet build --configuration ${{ matrix.configuration }} -o ${{ github.workspace }}/${{ matrix.configuration }}-build
           dotnet test
+
+      - name: Build package of ${{ env.BUILD }} - dotnet
+        if: ${{ env.BUILD_DOTNET != '' }}
+        run: |
+          ls -t ${{ github.workspace }}/${{ matrix.configuration }}-build
+          ls -t ${{ github.workspace }}/${{ matrix.configuration }}-build/*
+
+      # Upload artifact unless its merge to master
+      - name: Upload builds to artifacts
+        uses: actions/upload-artifact@v3
+        if: github.event_name == 'pull_request'
+        with:
+          name: ${{ env.SOLUTION }}-${{ matrix.configuration }}-${{ env.SHORT_SHA }}
+          path: ${{ github.workspace }}/${{ matrix.configuration }}-build
+          if-no-files-found: error
+
+      - name: Build and Test - server
+        if: ${{ env.BUILD == 'server' }} 
+        run: |
+          echo ${{ github.repository }}
+          echo ${{ env.SETREPO }}
