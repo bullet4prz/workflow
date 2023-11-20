@@ -67,8 +67,6 @@ jobs:
           echo "echo $SETREPO $BUILD_DOTNET"
           SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-6)
           echo "SHORT_SHA=${SHORT_SHA}" >> $GITHUB_ENV
-          LAST_COMMIT=$(git rev-parse HEAD)
-          echo "LAST_COMMIT=${LAST_COMMIT}" >> $GITHUB_ENV
           NOW=$(date +"%Y-%m-%d")
           echo "NOW=$NOW" >> $GITHUB_ENV
           mkdir out
@@ -80,7 +78,8 @@ jobs:
           dotnet restore
           dotnet build --nologo --no-restore --self-contained true -r win-x64 /p:PublishSingleFile=true -c ${{ matrix.configuration }} -o ${{ github.workspace }}/out/${{ env. SOLUTION }}-${{ matrix.configuration }} /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true
           dotnet test
-          echo ${{ env.LAST_COMMIT}}
+          LAST_COMMIT=$(git rev-parse HEAD)
+          echo ${LAST_COMMIT}
 
       - name: Build and Test - launcher/manager - dotnet
         if: ${{ env.BUILD_DOTNET != '' &&  env.BUILD != 'client'}} 
@@ -89,7 +88,8 @@ jobs:
           dotnet restore
           dotnet publish ${{env.BUILD}}/${{env.BUILD}}.csproj --self-contained true -r win-x64 --nologo -c ${{ matrix.configuration }} -o ${{ github.workspace }}/out/${{ env. SOLUTION }}-${{ matrix.configuration }} /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true /p:PublishSingleFile=true
           dotnet test
-          echo ${{ env.LAST_COMMIT}}
+          LAST_COMMIT=$(git rev-parse HEAD)
+          echo ${LAST_COMMIT}
           cd -
   
       - name: Build package of ${{ env.BUILD }} - dotnet
@@ -111,6 +111,8 @@ jobs:
         run: |
           echo ${{ github.repository }}
           echo ${{ env.SETREPO }}
+          LAST_COMMIT=$(git rev-parse HEAD)
+          echo ${LAST_COMMIT}
 
 
       - name: Create Release
