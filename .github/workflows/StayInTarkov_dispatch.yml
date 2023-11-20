@@ -69,8 +69,8 @@ jobs:
           LAST_COMMIT=$(git rev-parse HEAD)
           echo "LAST_COMMIT=${LAST_COMMIT}" >> $GITHUB_ENV
 
-      - name: Build and Test - dotnet
-        if: ${{ env.BUILD_DOTNET != '' }} 
+      - name: Build and Test - client - dotnet
+        if: ${{ env.BUILD_DOTNET != '' &&  env.BUILD == 'client'}} 
         run: |
           mkdir ${{ github.workspace }}/${{ matrix.configuration }}-build
           dotnet restore
@@ -78,6 +78,15 @@ jobs:
           dotnet test
           echo ${{ env.LAST_COMMIT}}
 
+      - name: Build and Test - launcher/manager - dotnet
+        if: ${{ env.BUILD_DOTNET != '' &&  env.BUILD != 'client'}} 
+        run: |
+          mkdir ${{ github.workspace }}/${{ matrix.configuration }}-build
+          dotnet restore
+          dotnet publish --nologo --no-restore -c ${{ matrix.configuration }} -o ${{ github.workspace }}/${{ matrix.configuration }}-build /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true
+          dotnet test
+          echo ${{ env.LAST_COMMIT}}
+  
       - name: Build package of ${{ env.BUILD }} - dotnet
         if: ${{ env.BUILD_DOTNET != '' }}
         run: |
