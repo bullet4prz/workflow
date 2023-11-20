@@ -40,7 +40,7 @@ jobs:
         if: ${{ github.event.inputs.build == 'manager' }}
         run: |
           echo "BUILD=manager" >> $GITHUB_ENV
-          echo "BUILD_DOTNET=7.0.x" >> $GITHUB_ENV
+          echo "BUILD_DOTNET=8.0.x" >> $GITHUB_ENV
           echo "SETREPO=stayintarkov/SIT.Manager" >> $GITHUB_ENV
           echo "SOLUTION=SIT.Manager" >> $GITHUB_ENV
 
@@ -99,13 +99,13 @@ jobs:
         run: |
           cd ${{ env. SOLUTION }}_build
           dotnet restore
-          dotnet publish ${{env.SOLUTION}}/${{env.SOLUTION}}.csproj --self-contained true -r win-x64 --nologo -c ${{ matrix.configuration }} -o ${{ github.workspace }}/out/${{ env. SOLUTION }}-${{ matrix.configuration }} /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true /p:PublishSingleFile=true
+          dotnet publish ${{env.SOLUTION}}/${{env.SOLUTION}}.csproj -r win-x64 --self-contained true --nologo -c ${{ matrix.configuration }} -o ${{ github.workspace }}/out/${{ env. SOLUTION }}-${{ matrix.configuration }} /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true /p:PublishSingleFile=true
           dotnet test
           LAST_COMMIT=$(git rev-parse HEAD)
           echo ${LAST_COMMIT}
           cd -
   
-      - name: Prebuild artifact(s) ${{ env.BUILD }} - dotnet
+      - name: Prebuild artifact(s) for ${{ env.BUILD }} - dotnet
         if: ${{ env.BUILD_DOTNET != '' }}
         run: |
           ls -t ${{ github.workspace }}/out/${{ env. SOLUTION }}-${{ matrix.configuration }}/* | grep -i -e Json -e pdb | xargs -n1 rm
@@ -129,7 +129,6 @@ jobs:
           pwd
           cd -
           pwd
-
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
