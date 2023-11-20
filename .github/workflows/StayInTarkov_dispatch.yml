@@ -83,7 +83,7 @@ jobs:
         run: |
           mkdir ${{ github.workspace }}/${{ matrix.configuration }}-build
           dotnet restore
-          dotnet publish --nologo --no-restore -c ${{ matrix.configuration }} -o ${{ github.workspace }}/${{ matrix.configuration }}-build /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true
+          dotnet publish --nologo -c ${{ matrix.configuration }} -o ${{ github.workspace }}/${{ matrix.configuration }}-build /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true --self-contained true -r win-x64 /p:PublishSingleFile=true
           dotnet test
           echo ${{ env.LAST_COMMIT}}
   
