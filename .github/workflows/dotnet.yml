@@ -45,7 +45,7 @@ jobs:
 
     - name: Determine .NET version and build
       run: |
-        echo "RSHA=${{ github.sha:0:7 }}" >> $GITHUB_ENV
+        echo "RSHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
         mkdir ${{ github.workspace}}/rls
         for dir in $(find . -name '*.csproj'); do
           cd $(dirname $dir)
