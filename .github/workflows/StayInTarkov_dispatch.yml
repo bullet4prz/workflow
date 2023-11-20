@@ -76,7 +76,7 @@ jobs:
         run: |
           cd ${{ env. SOLUTION }}_build
           dotnet restore
-          dotnet build Source/${{env.BUILD}}.csproj --nologo --no-restore --self-contained true -r win-x64 /p:PublishSingleFile=true -c ${{ matrix.configuration }} -o ${{ github.workspace }}/out/${{ env. SOLUTION }}-${{ matrix.configuration }} /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true
+          dotnet build Source/${{env.SOLUTION}}.csproj --nologo --no-restore --self-contained true -r win-x64 /p:PublishSingleFile=true -c ${{ matrix.configuration }} -o ${{ github.workspace }}/out/${{ env. SOLUTION }}-${{ matrix.configuration }} /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true
           dotnet test
           LAST_COMMIT=$(git rev-parse HEAD)
           echo ${LAST_COMMIT}
@@ -85,7 +85,7 @@ jobs:
         if: ${{ env.BUILD_DOTNET != '' &&  env.BUILD != 'client'}} 
         run: |
           dotnet restore
-          dotnet publish ${{env.BUILD}}/${{env.BUILD}}.csproj --self-contained true -r win-x64 --nologo -c ${{ matrix.configuration }} -o ${{ github.workspace }}/out/${{ env. SOLUTION }}-${{ matrix.configuration }} /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true /p:PublishSingleFile=true
+          dotnet publish ${{env.SOLUTION}}/${{env.SOLUTION}}.csproj --self-contained true -r win-x64 --nologo -c ${{ matrix.configuration }} -o ${{ github.workspace }}/out/${{ env. SOLUTION }}-${{ matrix.configuration }} /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true /p:PublishSingleFile=true
           dotnet test
           LAST_COMMIT=$(git rev-parse HEAD)
           echo ${LAST_COMMIT}
