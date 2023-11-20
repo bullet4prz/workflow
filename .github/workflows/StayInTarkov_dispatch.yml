@@ -14,7 +14,6 @@ jobs:
 
     steps:
 
-
       - name: Set Client
         if: ${{ github.event.inputs.build == 'client' }}
         run: |
@@ -62,6 +61,8 @@ jobs:
       - name: Build and Test
         if: ${{ env.BUILD_DOTNET != '' }} 
         run: |
+          echo ${{ github.repository }}
+          pwd
           dotnet restore
           dotnet build
           dotnet test
