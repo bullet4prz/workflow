@@ -70,11 +70,10 @@ jobs:
       - name: Build and Test - dotnet
         if: ${{ env.BUILD_DOTNET != '' }} 
         run: |
-          echo ${{ github.repository }}
           pwd && ls -t
           mkdir ${{ github.workspace }}/${{ matrix.configuration }}-build
           dotnet restore
-          dotnet build --nologo --no-restore  -c ${{ matrix.configuration }} -o ${{ github.workspace }}/${{ matrix.configuration }}-build /p:Platform=AnyCPU /p:PlatformTarget=x64
+          dotnet build --nologo --no-restore  -c ${{ matrix.configuration }} -o ${{ github.workspace }}/${{ matrix.configuration }}-build /p:PlatformTarget=x64
           dotnet test
 
       - name: Build package of ${{ env.BUILD }} - dotnet
