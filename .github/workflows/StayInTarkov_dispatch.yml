@@ -142,24 +142,24 @@ jobs:
           cd -
           mkdir out
 
-      - name: Build and Test - manager - dotnet
+      - name: Build and Test - ${{ env.SOLUTION }} - dotnet
         if: ${{ github.event.inputs.build == 'manager'}} 
         run: |
           cd __build
           dotnet --version
           dotnet restore /p:EnableWindowsTargeting=true
-          dotnet publish ${{ env.SOLUTION }}/${{ env.SOLUTION }}.csproj /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true /p:PublishSingleFile=true --self-contained true --nologo -c ${{ matrix.configuration }} -o ${{ github.workspace }}/out/${{ env.SOLUTION }}-${{ matrix.configuration }} /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true /p:PublishSingleFile=true
+          dotnet publish ${{ env.SOLUTION }}/${{ env.SOLUTION }}.csproj --self-contained true -r win-x64 /p:PublishSingleFile=true -c ${{ matrix.configuration }} -o ${{ github.workspace }}/out/${{ env.SOLUTION }}-${{ matrix.configuration }}
           dotnet test
           git rev-parse HEAD
           cd -
     
-      - name: Build and Test - launcher - dotnet
+      - name: Build and Test - ${{ env.SOLUTION }} - dotnet
         if: ${{ github.event.inputs.build == 'launcher'}}
         run: |
           cd __build
           dotnet --version
           dotnet restore /p:EnableWindowsTargeting=true
-          dotnet publish ${{ env.SOLUTION }}/${{ env.SOLUTION }}.csproj /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true /p:PublishSingleFile=true --self-contained true -c ${{ matrix.configuration }} -o ${{ github.workspace }}/out/${{ env.SOLUTION }}-${{ matrix.configuration }} 
+          dotnet publish ${{ env.SOLUTION }}/${{ env.SOLUTION }}.csproj --self-contained true -r win-x64 /p:PublishSingleFile=true -c ${{ matrix.configuration }} -o ${{ github.workspace }}/out/${{ env.SOLUTION }}-${{ matrix.configuration }} 
           dotnet test
           git rev-parse HEAD
           cd -
@@ -181,7 +181,7 @@ jobs:
         with:
           draft: true
           generate_release_notes: true
-          tag_name: ${{ env.SOLUTION }}-${{ env.NOW }}-v1.${{ github.run_number }}
+          tag_name: ${{ env.SOLUTION }}-${{ env.NOW }}-${{ github.run_number }}
           files: |
             out/${{ env.SOLUTION }}-${{ matrix.configuration }}.zip
 
