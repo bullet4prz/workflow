@@ -2,18 +2,17 @@ name: .NET
 
 on:
   push:
+    branches: 
+      - main
     paths-ignore:
-    - '.github/*'
-    - '.github/*_TEMPLATE/**'
-    - '*.md'
-    branches: [ "main" ]
+      - '.github/**'
+      - '*.md'
   pull_request:
-    branches: [ "main" ]
+    branches: 
+      - main
     paths-ignore:
-    - '.github/*'
-    - '.github/*_TEMPLATE/**'
-    - '*.md'
-    
+      - '.github/**'
+      - '*.md'
 env:
   SolutionName: "StayInTarkov"
 
