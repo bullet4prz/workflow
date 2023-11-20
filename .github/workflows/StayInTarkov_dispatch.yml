@@ -73,19 +73,17 @@ jobs:
           pwd && ls -t
           mkdir ${{ github.workspace }}/${{ matrix.configuration }}-build
           dotnet restore
-          dotnet build --nologo --no-restore  -c ${{ matrix.configuration }} -o ${{ github.workspace }}/${{ matrix.configuration }}-build /p:PlatformTarget=x64
+          dotnet build --nologo --no-restore -c ${{ matrix.configuration }} -o ${{ github.workspace }}/${{ matrix.configuration }}-build /p:PlatformTarget=x64 /p:NoWarn=CS0649
           dotnet test
 
       - name: Build package of ${{ env.BUILD }} - dotnet
         if: ${{ env.BUILD_DOTNET != '' }}
         run: |
-          ls -t ${{ github.workspace }}/${{ matrix.configuration }}-build
-          ls -t ${{ github.workspace }}/${{ matrix.configuration }}-build/*
+          ls -t ${{ github.workspace }}/${{ matrix.configuration }}-build/* | grep -i -e Json -e pdb | xargs -n1 rm 
 
       # Upload artifact unless its merge to master
       - name: Upload builds to artifacts
         uses: actions/upload-artifact@v3
-        if: github.event_name == 'pull_request'
         with:
           name: ${{ env.SOLUTION }}-${{ matrix.configuration }}-${{ env.SHORT_SHA }}
           path: ${{ github.workspace }}/${{ matrix.configuration }}-build
