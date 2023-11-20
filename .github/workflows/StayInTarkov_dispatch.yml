@@ -60,6 +60,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: ${{ env.SETREPO }}
+          path: ${{ env. SOLUTION }}_build
 
       - name: ${{ env.SHORT_SHA }} ${{ env.BUILD }}
         run: |
@@ -68,13 +69,16 @@ jobs:
           echo "SHORT_SHA=${SHORT_SHA}" >> $GITHUB_ENV
           LAST_COMMIT=$(git rev-parse HEAD)
           echo "LAST_COMMIT=${LAST_COMMIT}" >> $GITHUB_ENV
+          NOW=$(date +"%Y-%m-%d")
+          echo "NOW=$NOW" >> $GITHUB_ENV
+          mkdir out
 
       - name: Build and Test - client - dotnet
         if: ${{ env.BUILD_DOTNET != '' &&  env.BUILD == 'client'}} 
         run: |
-          mkdir ${{ github.workspace }}/${{ matrix.configuration }}-build
+          cd ${{ env. SOLUTION }}_build
           dotnet restore
-          dotnet build --nologo --no-restore --self-contained true -r win-x64 /p:PublishSingleFile=true -c ${{ matrix.configuration }} -o ${{ github.workspace }}/${{ matrix.configuration }}-build /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true
+          dotnet build --nologo --no-restore --self-contained true -r win-x64 /p:PublishSingleFile=true -c ${{ matrix.configuration }} -o ${{ github.workspace }}/out/${{ env. SOLUTION }}-${{ matrix.configuration }} /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true
           dotnet test
           echo ${{ env.LAST_COMMIT}}
 
@@ -83,21 +87,23 @@ jobs:
         run: |
           mkdir ${{ github.workspace }}/${{ matrix.configuration }}-build
           dotnet restore
-          dotnet publish --self-contained true -r win-x64 --nologo -c ${{ matrix.configuration }} -o ${{ github.workspace }}/${{ matrix.configuration }}-build /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true /p:PublishSingleFile=true
+          dotnet publish ${{env.BUILD}}/${{env.BUILD}}.csproj --self-contained true -r win-x64 --nologo -c ${{ matrix.configuration }} -o ${{ github.workspace }}/out/${{ env. SOLUTION }}-${{ matrix.configuration }} /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true /p:PublishSingleFile=true
           dotnet test
           echo ${{ env.LAST_COMMIT}}
+          cd -
   
       - name: Build package of ${{ env.BUILD }} - dotnet
         if: ${{ env.BUILD_DOTNET != '' }}
         run: |
-          ls -t ${{ github.workspace }}/${{ matrix.configuration }}-build/* | grep -i -e Json -e pdb | xargs -n1 rm 
+          ls -t ${{ github.workspace }}/out/${{ env. SOLUTION }}-${{ matrix.configuration }}/* | grep -i -e Json -e pdb | xargs -n1 rm
+          zip -jr ${{ github.workspace }}/out/${{ env. SOLUTION }}-${{ matrix.configuration }}.zip ${{ matrix.configuration }} -o ${{ github.workspace }}/out/${{ env. SOLUTION }}-${{ matrix.configuration }}
 
       # Upload artifact unless its merge to master
       - name: Upload builds to artifacts
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.SOLUTION }}-${{ matrix.configuration }}-${{ env.SHORT_SHA }}
-          path: ${{ github.workspace }}/${{ matrix.configuration }}-build
+          path: ${{ github.workspace }}/out/${{ env. SOLUTION }}-${{ matrix.configuration }}.zip
           if-no-files-found: error
 
       - name: Build and Test - server
@@ -106,3 +112,12 @@ jobs:
           echo ${{ github.repository }}
           echo ${{ env.SETREPO }}
 
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          generate_release_notes: true
+          tag_name: ${{ env.SOLUTION }}-${{ env.NOW }}-v1.${{ github.run_number }}
+          files: |
+            ${{ github.workspace }}/out/${{ env. SOLUTION }}-${{ matrix.configuration }}.zip
