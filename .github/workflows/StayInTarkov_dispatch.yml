@@ -75,6 +75,7 @@ jobs:
         if: ${{ env.BUILD_DOTNET != '' &&  env.BUILD == 'client'}} 
         run: |
           cd ${{ env. SOLUTION }}_build
+          ls * -t
           dotnet restore
           dotnet build ${{ env. SOLUTION }}_build/Source/StayInTarkov.csproj --nologo --no-restore --self-contained true -r win-x64 /p:PublishSingleFile=true -c ${{ matrix.configuration }} -o ${{ github.workspace }}/out/${{ env. SOLUTION }}-${{ matrix.configuration }} /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true
           dotnet test
@@ -85,6 +86,7 @@ jobs:
         if: ${{ env.BUILD_DOTNET != '' &&  env.BUILD != 'manager'}} 
         run: |
           cd ${{ env. SOLUTION }}_build
+          ls * -t
           dotnet restore
           dotnet publish ${{ env. SOLUTION }}/${{env.SOLUTION}}.csproj --self-contained true -r win-x64 --nologo -c ${{ matrix.configuration }} -o ${{ github.workspace }}/out/${{ env. SOLUTION }}-${{ matrix.configuration }} /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true /p:PublishSingleFile=true
           dotnet test
@@ -96,6 +98,7 @@ jobs:
         if: ${{ env.BUILD_DOTNET != '' &&  env.BUILD == 'launcher'}} 
         run: |
           cd ${{ env. SOLUTION }}_build
+          ls * -t
           dotnet restore
           dotnet publish ${{env.SOLUTION}}/${{env.SOLUTION}}.csproj --self-contained true -r win-x64 --nologo -c ${{ matrix.configuration }} -o ${{ github.workspace }}/out/${{ env. SOLUTION }}-${{ matrix.configuration }} /p:PlatformTarget=x64 /p:NoWarn=CS0649 /p:EnableWindowsTargeting=true /p:PublishSingleFile=true
           dotnet test
