@@ -148,7 +148,7 @@ jobs:
           cd __build
           dotnet --version
           dotnet restore /p:EnableWindowsTargeting=true
-          dotnet build ${{ env.SOLUTION }}/${{ env.SOLUTION }}.csproj -r win-x64 /p:PublishSingleFile=true -c ${{ matrix.configuration }} -o ${{ github.workspace }}/out/${{ env.SOLUTION }}-${{ matrix.configuration }}
+          dotnet build ${{ env.SOLUTION }}/${{ env.SOLUTION }}.csproj -r win-x64 /p:PublishSingleFile=true /p:PlatformTarget=x64 /p:NoWarn=CS0649 -c ${{ matrix.configuration }} -o ${{ github.workspace }}/out/${{ env.SOLUTION }}-${{ matrix.configuration }}
           dotnet test
           git rev-parse HEAD
           cd -
